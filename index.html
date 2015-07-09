@@ -1,0 +1,483 @@
+<html>
+    <head>
+        <script src="https://www.google.com/jsapi"></script>
+        <script src="web-animations-next.min.js"></script>
+        <style>
+            .media {
+                position: fixed;
+            }
+            .pin {
+                position: absolute;
+                height: 40;
+                z-index: 10;
+                opacity: 0;
+            }
+            .pic {
+                margin: 10;
+            }
+            .name {
+                position: fixed;
+                color: LightBlue;
+                font-size: 30px;
+                text-align: center;
+                width: 300;
+                z-index: 10;
+            }
+            #info {
+                position: fixed;
+                width: 90%;
+                left: 5%;
+                bottom: 0;
+            }
+            @media only screen and (min-width : 900px) {
+                #map {
+                    position: fixed;
+                    width: 600;
+                    height: 430;
+                    left: 50%;
+                    margin-left: -300;
+                }
+                #rj_map {
+                    position: absolute;
+                    width: 100%;
+                    height: 100%;
+                    opacity: 0;
+                }
+                .vid {
+                    width: 300;
+                    z-index: 10;
+                }
+                #pin_rj {
+                    left: 230;
+                    top: 320;
+                }
+                #pin_nt {
+                    left: 260;
+                    top: 310;
+                }
+                #pin_tr {
+                    left: 260;
+                    top: 240;
+                }
+                #pin_pr {
+                    left: 5;
+                    top: 365;
+                }
+            }
+            @media only screen and (max-width : 899px) {
+                #map {
+                    position: fixed;
+                    width: 80%;
+                    left: 10%;
+                    padding-bottom: 57.67%;
+                }
+                #rj_map {
+                    position: absolute;
+                    width: 100%;
+                    top: 0;
+                    bottom: 0;
+                    opacity: 0;
+                }
+                .vid {
+                    left: 25%;
+                    width: 50%;
+                    z-index: 10;
+                }
+                #pin_rj {
+                    left: 38.33%;
+                    top: 74.42%;
+                }
+                #pin_nt {
+                    left: 43.33%;
+                    top: 72.09%;
+                }
+                #pin_tr {
+                    left: 43.33%;
+                    top: 55.81%;
+                }
+                #pin_pr {
+                    left: 0.83%;
+                    top: 84.88%;
+                }
+            }
+        </style>
+    </head>
+    
+    <body>
+        <div id='map'>
+            <img id='rj_map'  src='rj.png'/>
+            <img id='pin_rj' class='pin' src='pin.png'/>
+            <img id='pin_nt' class='pin' src='pin.png'/>
+            <img id='pin_tr' class='pin' src='pin.png'/>
+            <img id='pin_pr' class='pin' src='pin.png'/>
+        </div>
+        
+        <div id='name_rj' class='name'>Rio de Janeiro</div>
+        <div id='name_nt' class='name'>Niter&oacute;i</div>
+        <div id='name_tr' class='name'>Teres&oacute;polis</div>
+        <div id='name_pr' class='name'>Paraty</div>
+        
+        <video id='vid_rj' class='vid media' src='video_rj.mp4' muted></video>
+        <video id='vid_nt' class='vid media' src='video_nt.mp4' muted></video>
+        <video id='vid_tr' class='vid media' src='video_tr.mp4' muted></video>
+        <video id='vid_pr' class='vid media' src='video_pr.mp4' muted></video>
+        
+        <div id='info'></div>
+        
+        <script type="text/javascript">
+            google.load('search', '1');
+            
+            function Media(e) {
+                this.elm = document.querySelector(e);
+                this.visible = true;
+            }
+            Media.prototype = {
+                left: function () {
+                    return this.elm.offsetLeft;
+                },
+                middle: function () {
+                    return this.elm.offsetLeft + (this.elm.offsetWidth / 2);
+                },
+                right: function () {
+                    return this.elm.offsetLeft + this.elm.offsetWidth;
+                },
+                width: function () {
+                    return this.elm.offsetWidth;
+                },
+                top: function () {
+                    return this.elm.offsetTop;
+                },
+                center: function () {
+                    return this.elm.offsetTop + (this.elm.offsetHeight / 2);
+                },
+                bottom: function () {
+                    return this.elm.offsetTop + this.elm.offsetHeight;
+                },
+                height: function () {
+                    return this.elm.offsetHeight;
+                },
+                show: function () {
+                    this.elm.style.opacity = 1;
+                    this.visible = true;
+                },
+                hide: function () {
+                    this.elm.style.opacity = 0;
+                    this.visible = false;
+                },
+                clean: function () {
+                    this.elm.removeAttribute('style');
+                },
+                start: function () {
+                    if (this.elm.play == undefined)
+                        return;
+                    
+                    this.elm.play();
+                    this.elm.style.opacity = 1;
+                    this.visible = true;
+                    refresh();
+                },
+                stop: function () {
+                    if (this.elm.pause == undefined)
+                        return;
+                    
+                    if (!this.elm.ended && !this.elm.paused) {
+                        this.elm.pause();
+                        this.elm.currentTime = 0;
+                    }
+                    
+                    info.elm.innerHTML = '';
+                    this.elm.style.opacity = 0;
+                    this.visible = false;
+                    refresh();
+                },
+                setTop: function (t) {
+                    this.elm.style.top = t
+                },
+                setLeft: function (l) {
+                    this.elm.style.left = l
+                },
+            };
+            
+            var context = {
+                multiple: true,
+                width: window.innerWidth,
+                height: window.innerHeight,
+                refresh: function () {
+                    this.width = window.innerWidth;
+                    this.height = window.innerHeight;
+                }
+            };
+            
+            var map = new Media('#map');
+            var info = new Media('#info');
+            var rjmap = new Media('#rj_map');
+            var pinrj = new Media('#pin_rj');
+            var pinnt = new Media('#pin_nt');
+            var pintr = new Media('#pin_tr');
+            var pinpr = new Media('#pin_pr');
+            var namrj = new Media('#name_rj');
+            var namnt = new Media('#name_nt');
+            var namtr = new Media('#name_tr');
+            var nampr = new Media('#name_pr');
+            var vidrj = new Media('#vid_rj');
+            var vidnt = new Media('#vid_nt');
+            var vidtr = new Media('#vid_tr');
+            var vidpr = new Media('#vid_pr');
+            
+            
+            function refresh() {
+                context.refresh();
+                
+                if (context.width <= 899) {
+                    if (vidrj.visible) {
+                        vidrj.clean();
+                        vidrj.setTop(rjmap.bottom() + 40);
+                        info.setTop(vidrj.bottom() + 10);
+                    }
+                    if (vidnt.visible) {
+                        vidnt.clean();
+                        vidnt.setTop(rjmap.bottom() + 40);
+                        info.setTop(vidnt.bottom() + 10);
+                    }
+                    if (vidtr.visible) {
+                        vidtr.clean();
+                        vidtr.setTop(rjmap.bottom() + 40);
+                        info.setTop(vidtr.bottom() + 10);
+                    }
+                    if (vidpr.visible) {
+                        vidpr.clean();
+                        vidpr.setTop(rjmap.bottom() + 40);
+                        info.setTop(vidpr.bottom() + 10);
+                    }
+                }
+                else {
+                    if (vidpr.visible) {
+                        vidpr.setTop(rjmap.bottom() + 40);
+                        var posx = map.left() + pinpr.middle() - (vidpr.width() / 2);
+                        vidpr.setLeft(posx > 0 ? posx : 10);
+                    }
+                    if (vidrj.visible) {
+                        vidrj.setTop(rjmap.bottom() + 10);
+                        var posx = map.left() + pinrj.middle() - (vidrj.width() / 2);
+                        var posr = vidpr.right() + 10;
+                        vidrj.setLeft(posx > posr || !vidpr.visible ? posx : posr);
+                    }
+                    if (vidnt.visible) {
+                        vidnt.setTop(rjmap.bottom() + 10);
+                        var posx = map.left() + pinnt.middle() - (vidnt.width() / 2);
+                        var posr
+                        if (vidrj.visible)
+                            posr = vidrj.right() + 10;
+                        else if (vidpr.visible)
+                            posr = vidpr.right() + 10;
+                        else
+                            posr = 0
+                        vidnt.setLeft(posx > posr ? posx : posr);
+                    }
+                    if (vidtr.visible) {
+                        vidtr.setTop(pintr.center() - (vidtr.height() / 2));
+                        var posx = context.width - 10 - vidtr.width();
+                        var posr = map.right() + 10;
+                        vidtr.setLeft(posr < posx ? posr : posx);
+                    }
+                    
+                    var posy;
+                    if (vidpr.visible) {
+                        posy = vidpr.bottom() + 10;
+                    }
+                    if (vidrj.visible) {
+                        posy = posy > vidrj.bottom() + 10 ? posy : vidrj.bottom() + 10;
+                    }
+                    if (vidnt.visible) {
+                        posy = posy > vidnt.bottom() + 10 ? posy : vidnt.bottom() + 10;
+                    }
+                    if (vidtr.visible) {
+                        posy = posy > vidtr.bottom() + 10 ? posy : vidtr.bottom() + 10;
+                        posy = posy > rjmap.bottom() ? posy : rjmap.bottom();
+                    }
+                    info.setTop(posy);
+                }
+                
+                if (vidrj.visible) {
+                    namrj.setLeft(vidrj.middle() - (namrj.width() / 2))
+                    namrj.setTop(vidrj.top() - 30);
+                    namrj.show();
+                }
+                else {
+                    namrj.hide();
+                }
+                if (vidnt.visible) {
+                    namnt.setLeft(vidnt.middle() - (namnt.width() / 2))
+                    namnt.setTop(vidnt.top() - 30);
+                    namnt.show();
+                }
+                else {
+                    namnt.hide();
+                }
+                if (vidtr.visible) {
+                    namtr.setLeft(vidtr.middle() - (namtr.width() / 2))
+                    namtr.setTop(vidtr.top() - 30);
+                    namtr.show();
+                }
+                else {
+                    namtr.hide();
+                }
+                if (vidpr.visible) {
+                    nampr.setLeft(vidpr.middle() - (nampr.width() / 2))
+                    nampr.setTop(vidpr.top() - 30);
+                    nampr.show();
+                }
+                else {
+                    nampr.hide();
+                }
+            }
+            
+            vidpr.hide();
+            vidrj.hide();
+            vidnt.hide();
+            vidtr.hide();
+            nampr.hide();
+            namrj.hide();
+            namnt.hide();
+            namtr.hide();
+            window.onload = refresh;
+            window.onresize = refresh;
+            
+            
+            // ---------- KEYFRAMES ----------
+            var fade_in =  [{opacity: 0},
+                            {opacity: 1}];
+            var fade_out = [{opacity: 1},
+                            {opacity: 0}];
+            
+            // ---------- ANIMATIONS ----------
+            function show_pin_pr() {
+                pinpr.elm.animate(fade_in, {duration: 1500, fill: 'forwards'});
+            };
+            function show_pin_tr() {
+                var anim = pintr.elm.animate(fade_in, {duration: 1500, fill: 'forwards'});
+                anim.onfinish = show_pin_pr;
+            };
+            function show_pin_nt() {
+                var anim = pinnt.elm.animate(fade_in, {duration: 1500, fill: 'forwards'});
+                anim.onfinish = show_pin_tr;
+            };
+            function show_pin_rj() {
+                var anim = pinrj.elm.animate(fade_in, {duration: 1500, fill: 'forwards'});
+                anim.onfinish = show_pin_nt;
+            };
+            
+            var rj_fade = rjmap.elm.animate(fade_in, {duration: 3000, fill: 'forwards'});
+            rj_fade.onfinish = show_pin_rj;
+            
+            
+            var ims;
+            function cityinfo() {
+                if (ims.results && ims.results.length > 0) {
+                    for (var i = 0; i < ims.results.length; i++) {
+                        var x = document.createElement('img');
+                        x.className = 'pic';
+                        console.log(ims.results[i]);
+                        x.src = ims.results[i].tbUrl;
+                        info.elm.appendChild(x);
+                    }
+                }
+            }
+            
+            function startSearch() {
+                ims = new google.search.ImageSearch();
+                ims.setResultSetSize(8);
+                ims.setSearchCompleteCallback(this, cityinfo, null);
+            }
+            google.setOnLoadCallback(startSearch);
+            
+            
+            pinpr.elm.onclick = function () {
+                if (context.multiple && context.width >= 900) {
+                    vidpr.start();
+                }   
+                else {
+                    vidrj.stop();
+                    vidnt.stop();
+                    vidtr.stop();
+                    vidpr.start();
+                }
+            };
+            pinrj.elm.onclick = function () {
+                if (context.multiple && context.width >= 900) {
+                    vidrj.start();
+                }   
+                else {
+                    vidpr.stop();
+                    vidnt.stop();
+                    vidtr.stop();
+                    vidrj.start();
+                }
+            };
+            pinnt.elm.onclick = function () {
+                if (context.multiple && context.width >= 900) {
+                    vidnt.start();
+                }   
+                else {
+                    vidrj.stop();
+                    vidpr.stop();
+                    vidtr.stop();
+                    vidnt.start();
+                }
+            };
+            pintr.elm.onclick = function () {
+                if (context.multiple && context.width >= 900) {
+                    vidtr.start();
+                }   
+                else {
+                    vidrj.stop();
+                    vidnt.stop();
+                    vidpr.stop();
+                    vidtr.start();
+                }
+            };
+            
+            vidpr.elm.onended = function () {
+                vidpr.hide();
+                nampr.hide();
+                info.elm.innerHTML = '';
+                refresh();
+            };
+            vidrj.elm.onended = function () {
+                vidrj.hide();
+                namrj.hide();
+                info.elm.innerHTML = '';
+                refresh();
+            };
+            vidnt.elm.onended = function () {
+                vidnt.hide();
+                namnt.hide();
+                info.elm.innerHTML = '';
+                refresh();
+            };
+            vidtr.elm.onended = function () {
+                vidtr.hide();
+                namtr.hide();
+                info.elm.innerHTML = '';
+                refresh();
+            };
+            
+            vidpr.elm.onplay = function () {
+                info.elm.innerHTML = '';
+                ims.execute('Paraty');
+            };
+            vidrj.elm.onplay = function () {
+                info.elm.innerHTML = '';
+                ims.execute('Rio de Janeiro');
+            };
+            vidnt.elm.onplay = function () {
+                info.elm.innerHTML = '';
+                ims.execute('Niteroi');
+            };
+            vidtr.elm.onplay = function () {
+                info.elm.innerHTML = '';
+                ims.execute('Teresopolis');
+            };
+        </script>
+    </body>
+</html>
