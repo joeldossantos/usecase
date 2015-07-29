@@ -23,7 +23,7 @@
                 width: 300;
                 z-index: 10;
             }
-            #info {
+            .info {
                 position: fixed;
                 width: 90%;
                 left: 5%;
@@ -122,7 +122,10 @@
         <video id='vid_tr' class='vid media' src='media/video_tr.mp4' muted></video>
         <video id='vid_pr' class='vid media' src='media/video_pr.mp4' muted></video>
         
-        <div id='info'></div>
+        <div id='info_rj' class='info'></div>
+        <div id='info_nt' class='info'></div>
+        <div id='info_tr' class='info'></div>
+        <div id='info_pr' class='info'></div>
         
         <script type="text/javascript">
             google.load('search', '1');
@@ -209,7 +212,6 @@
             };
             
             var map = new Media('#map');
-            var info = new Media('#info');
             var rjmap = new Media('#rj_map');
             var pinrj = new Media('#pin_rj');
             var pinnt = new Media('#pin_nt');
@@ -223,6 +225,10 @@
             var vidnt = new Media('#vid_nt');
             var vidtr = new Media('#vid_tr');
             var vidpr = new Media('#vid_pr');
+            var infrj = new Media('#info_rj');
+            var infnt = new Media('#info_nt');
+            var inftr = new Media('#info_tr');
+            var infpr = new Media('#info_pr');
             
             
             function refresh() {
@@ -232,22 +238,22 @@
                     if (vidrj.visible) {
                         vidrj.clean();
                         vidrj.setTop(rjmap.bottom() + 40);
-                        info.setTop(vidrj.bottom() + 10);
+                        infrj.setTop(vidrj.bottom() + 10);
                     }
                     if (vidnt.visible) {
                         vidnt.clean();
                         vidnt.setTop(rjmap.bottom() + 40);
-                        info.setTop(vidnt.bottom() + 10);
+                        infnt.setTop(vidnt.bottom() + 10);
                     }
                     if (vidtr.visible) {
                         vidtr.clean();
                         vidtr.setTop(rjmap.bottom() + 40);
-                        info.setTop(vidtr.bottom() + 10);
+                        inftr.setTop(vidtr.bottom() + 10);
                     }
                     if (vidpr.visible) {
                         vidpr.clean();
                         vidpr.setTop(rjmap.bottom() + 40);
-                        info.setTop(vidpr.bottom() + 10);
+                        infpr.setTop(vidpr.bottom() + 10);
                     }
                 }
                 else {
@@ -295,7 +301,10 @@
                         posy = posy > vidtr.bottom() + 10 ? posy : vidtr.bottom() + 10;
                         posy = posy > rjmap.bottom() ? posy : rjmap.bottom();
                     }
-                    info.setTop(posy);
+                    infpr.setTop(posy);
+                    infrj.setTop(posy);
+                    infnt.setTop(posy);
+                    inftr.setTop(posy);
                 }
                 
                 if (vidrj.visible) {
@@ -372,6 +381,7 @@
             
             
             var ims;
+            var info;
             function cityinfo() {
                 if (ims.results && ims.results.length > 0) {
                     for (var i = 0; i < ims.results.length; i++) {
@@ -380,6 +390,8 @@
                         console.log(ims.results[i]);
                         x.src = ims.results[i].tbUrl;
                         info.elm.appendChild(x);
+                        if (info.onbegin)
+                            info.onbegin();
                     }
                 }
             }
@@ -440,43 +452,68 @@
             vidpr.elm.onended = function () {
                 vidpr.hide();
                 nampr.hide();
-                info.elm.innerHTML = '';
+                infpr.elm.innerHTML = '';
                 refresh();
             };
             vidrj.elm.onended = function () {
                 vidrj.hide();
                 namrj.hide();
-                info.elm.innerHTML = '';
+                infrj.elm.innerHTML = '';
                 refresh();
             };
             vidnt.elm.onended = function () {
                 vidnt.hide();
                 namnt.hide();
-                info.elm.innerHTML = '';
+                infnt.elm.innerHTML = '';
                 refresh();
             };
             vidtr.elm.onended = function () {
                 vidtr.hide();
                 namtr.hide();
-                info.elm.innerHTML = '';
+                inftr.elm.innerHTML = '';
                 refresh();
             };
             
             vidpr.elm.onplay = function () {
-                info.elm.innerHTML = '';
+                infpr.elm.innerHTML = '';
+                info = infpr;
                 ims.execute('Paraty');
             };
             vidrj.elm.onplay = function () {
-                info.elm.innerHTML = '';
+                infrj.elm.innerHTML = '';
+                info = infrj;
                 ims.execute('Rio de Janeiro');
             };
             vidnt.elm.onplay = function () {
-                info.elm.innerHTML = '';
+                infnt.elm.innerHTML = '';
+                info = infnt;
                 ims.execute('Niteroi');
             };
             vidtr.elm.onplay = function () {
-                info.elm.innerHTML = '';
+                inftr.elm.innerHTML = '';
+                info = inftr;
                 ims.execute('Teresopolis');
+            };
+            
+            infpr.onbegin = function () {
+                infrj.elm.innerHTML = '';
+                infnt.elm.innerHTML = '';
+                inftr.elm.innerHTML = '';
+            };
+            infrj.onbegin = function () {
+                infpr.elm.innerHTML = '';
+                infnt.elm.innerHTML = '';
+                inftr.elm.innerHTML = '';
+            };
+            infnt.onbegin = function () {
+                infpr.elm.innerHTML = '';
+                infrj.elm.innerHTML = '';
+                inftr.elm.innerHTML = '';
+            };
+            inftr.onbegin = function () {
+                infpr.elm.innerHTML = '';
+                infrj.elm.innerHTML = '';
+                infnt.elm.innerHTML = '';
             };
         </script>
     </body>
